@@ -1,5 +1,5 @@
 //
-//  Notification+KeyboardAnimationInfo.swift
+//  NSObject+KeyboardAnimationStorable.swift
 //
 //  Copyright (c) 2021 Pedro Almeida
 //
@@ -23,25 +23,29 @@
 //
 
 import UIKit
+import ObjectAssociation
 
-public extension Notification {
+extension NSObject: KeyboardAnimationStorable {
     
-    /// This property contains information about the keyboard animation, if applicable.
-    var keyboardAnimationInfo: KeyboardAnimationInfo? {
+    private static var keyboardAnimationStore = ObjectAssociation<KeyboardAnimationStore>()
+    
+    public var keyboardAnimationStore: KeyboardAnimationStore? {
+        get { Self.keyboardAnimationStore[self] }
+        set { Self.keyboardAnimationStore[self] = newValue }
+    }
+    
+    @objc public func keyboardAnimationHandler(_ notification: Notification) {
         guard
-            userInfo?[.keyboardIsLocalKey] as? Bool == true,
-            let duration = userInfo?[.durationKey] as? Double,
-            let keyboardFrame = userInfo?[.frameKey] as? CGRect,
-            let curveValue = userInfo?[.curveKey] as? Int,
-            let curve = UIView.AnimationCurve(rawValue: curveValue)
+            let keyboardNotificationName = KeyboardNotificationName(rawValue: notification.name),
+            let keyboardAnimation = keyboardAnimationStore?[keyboardNotificationName]
         else {
-            return nil
+            return
         }
         
-        return KeyboardAnimationInfo(
-            duration: duration,
-            keyboardFrame: keyboardFrame,
-            curve: curve
+        UIView.animate(
+            withKeyboardNotification: notification,
+            animations: keyboardAnimation.animation,
+            completion: keyboardAnimation.completion
         )
     }
     

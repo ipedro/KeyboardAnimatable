@@ -1,5 +1,5 @@
 //
-//  Notification+KeyboardAnimationInfo.swift
+//  KeyboardAnimation.swift
 //
 //  Copyright (c) 2021 Pedro Almeida
 //
@@ -24,25 +24,11 @@
 
 import UIKit
 
-public extension Notification {
+/// Contains information about the keyboard animation.
+public struct KeyboardAnimation {
     
-    /// This property contains information about the keyboard animation, if applicable.
-    var keyboardAnimationInfo: KeyboardAnimationInfo? {
-        guard
-            userInfo?[.keyboardIsLocalKey] as? Bool == true,
-            let duration = userInfo?[.durationKey] as? Double,
-            let keyboardFrame = userInfo?[.frameKey] as? CGRect,
-            let curveValue = userInfo?[.curveKey] as? Int,
-            let curve = UIView.AnimationCurve(rawValue: curveValue)
-        else {
-            return nil
-        }
-        
-        return KeyboardAnimationInfo(
-            duration: duration,
-            keyboardFrame: keyboardFrame,
-            curve: curve
-        )
-    }
+    let animation: KeyboardAnimatable.Animations
+    
+    let completion: KeyboardAnimatable.Completion?
     
 }

@@ -1,5 +1,5 @@
 //
-//  KeyboardAnimationInfo.swift
+//  KeyboardAnimatable.swift
 //
 //  Copyright (c) 2021 Pedro Almeida
 //
@@ -22,18 +22,10 @@
 //  SOFTWARE.
 //
 
-import UIKit
+import Foundation
 
-/// Contains information about the keyboard animation.
-public struct KeyboardAnimationInfo {
+public protocol KeyboardAnimationStorable: NSObjectProtocol {
     
-    /// Duration of the animation in seconds.
-    public let duration: TimeInterval
-    
-    /// Ending frame rectangle of the keyboard in screen coordinates. The frame rectangle reflects the current orientation of the device.
-    public let keyboardFrame: CGRect
-    
-    /// Constant that defines how the keyboard will be animated onto or off the screen.
-    public let curve: UIView.AnimationCurve
+    var keyboardAnimationStore: KeyboardAnimationStore? { get set }
     
 }

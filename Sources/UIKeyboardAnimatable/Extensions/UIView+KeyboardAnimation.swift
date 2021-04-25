@@ -30,7 +30,7 @@ public extension UIView {
     ///
     /// - Parameters:
     ///   - notification: A notification containing keyboard animation information, others will be ignored.
-    ///   - animations: The specified animation block to the animator.
+    ///   - animations: The specified animation block to the animator. The duration, final frame, and animation curve are provided inside.
     ///   - completion: An optional block to execute when the animations finish. This block takes the parameter `finalPosition`, which describes the position where the animations stopped. Use this value to specify whether the animations stopped at their starting point, their end point, or their current position.
     static func animate(withKeyboardNotification notification: Notification,
                         animations: @escaping (KeyboardAnimationInfo) -> Void,
