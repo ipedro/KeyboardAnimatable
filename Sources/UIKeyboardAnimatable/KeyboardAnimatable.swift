@@ -62,7 +62,7 @@ extension UIViewController: KeyboardAnimationStorable {
         set { Self.keyboardAnimationStore[self] = newValue }
     }
     
-    @objc func keyboardHandler(_ notification: Notification) {
+    @objc public func keyboardHandler(_ notification: Notification) {
         guard
             let keyboardNotificationName = KeyboardNotificationName(rawValue: notification.name),
             let keyboardAnimation = keyboardAnimationStore?[keyboardNotificationName]
@@ -87,7 +87,7 @@ extension UIView: KeyboardAnimationStorable {
         set { Self.keyboardAnimationStore[self] = newValue }
     }
     
-    @objc func keyboardHandler(_ notification: Notification) {
+    @objc public func keyboardHandler(_ notification: Notification) {
         guard
             let keyboardNotificationName = KeyboardNotificationName(rawValue: notification.name),
             let keyboardAnimation = keyboardAnimationStore?[keyboardNotificationName]
