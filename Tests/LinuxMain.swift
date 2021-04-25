@@ -1,7 +1,7 @@
 import XCTest
 
-import KeyboardAnimatableTests
+import UIKeyboardAnimatableTests
 
 var tests = [XCTestCaseEntry]()
-tests += KeyboardAnimatableTests.allTests()
+tests += UIKeyboardAnimatableTests.allTests()
 XCTMain(tests)

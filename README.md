@@ -1,3 +1,3 @@
-# KeyboardAnimatable
+# UIKeyboardAnimatable
 
-A description of this package.
+Helpers to deal with keyboard animations in iOS.
