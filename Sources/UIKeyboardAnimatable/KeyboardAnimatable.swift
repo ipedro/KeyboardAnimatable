@@ -39,8 +39,8 @@ public extension KeyboardAnimatable {
     /// - Parameters:
     ///   - aSelector: A selector that specifies the message the receiver sends observer to alert it to the notification posting. The method that aSelector specifies must have one and only one argument (an instance of NSNotification).
     ///   - keyboardNotification: The keyboard notification to register for delivery to the observer.
-    func addKeyboardNotificationObserver(with selector: Selector, for keyboardNotification: KeyboardNotificationName) {
-        NotificationCenter.default.addKeyboardNotificationObserver(self, selector: selector, for: keyboardNotification)
+    func addKeyboardNotificationObserver(with selector: Selector, when keyboardNotification: KeyboardNotificationName) {
+        NotificationCenter.default.addKeyboardNotificationObserver(self, selector: selector, when: keyboardNotification)
     }
     
     /// Removes matching entries from the notification center's dispatch table.
@@ -56,8 +56,8 @@ public extension KeyboardAnimatable {
     /// - Parameters:
     ///   - observer: The observer to remove from the dispatch table. Specify an observer to remove only entries for this observer.
     ///   - keyboardNotification: The keyboard notification  to remove from the dispatch table.
-    func removeKeyboardNotificationObserver(with selector: Selector, for keyboardNotification: KeyboardNotificationName) {
-        NotificationCenter.default.removeKeyboardNotificationObserver(self, for: keyboardNotification)
+    func removeKeyboardNotificationObserver(with selector: Selector, when keyboardNotification: KeyboardNotificationName) {
+        NotificationCenter.default.removeKeyboardNotificationObserver(self, when: keyboardNotification)
     }
     
     /// Animate changes to one or more views using the keyboard animation's duration and animation curve.
