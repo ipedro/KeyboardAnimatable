@@ -108,32 +108,42 @@ public extension KeyboardAnimatable where Self: KeyboardAnimationStorable {
     func animateWithKeyboard(when notificationNames: [KeyboardNotificationName],
                                     animations: @escaping AnimationClosure,
                                     completion: Completion? = nil) {
+        notificationNames.forEach {
+            animateWithKeyboard(when: $0, animations: animations, completion: completion)
+        }
+    }
+    
+    
+    func animateWithKeyboard(when notificationName: KeyboardNotificationName,
+                                    animations: @escaping AnimationClosure,
+                                    completion: Completion? = nil) {
         
         let store = keyboardAnimationStore ?? KeyboardAnimationStore()
         
-        notificationNames.forEach { notificationName in
-            
-            let animation = KeyboardAnimation(
-                animation: animations,
-                completion: completion
-            )
-            
-            store[notificationName] = animation
-            
-            NotificationCenter.default.addKeyboardNotificationObserver(
-                self,
-                selector: #selector(keyboardHandler(_:)),
-                when: notificationName
-            )
-        }
+        let animation = KeyboardAnimation(
+            animation: animations,
+            completion: completion
+        )
+        
+        store[notificationName] = animation
+        
+        NotificationCenter.default.addKeyboardNotificationObserver(
+            self,
+            selector: #selector(keyboardHandler(_:)),
+            when: notificationName
+        )
         
         keyboardAnimationStore = store
     }
     
-    func removeKeyboardAnimations(when notificationNames: [KeyboardNotificationName]) {
-        notificationNames.forEach { notificationName in
-            NotificationCenter.default.removeKeyboardNotificationObserver(self, when: notificationName)
-        }
+    
+    func removeKeyboardAnimation(when notificationName: KeyboardNotificationName) {
+        NotificationCenter.default.removeKeyboardNotificationObserver(self, when: notificationName)
     }
     
+    func removeKeyboardAnimations(when notificationNames: [KeyboardNotificationName]) {
+        notificationNames.forEach {
+            removeKeyboardAnimation(when: $0)
+        }
+    }
 }
