@@ -23,52 +23,117 @@
 //
 
 import UIKit
+import ObjectAssociation
 
-public protocol KeyboardAnimatable {}
+@objc public protocol KeyboardAnimatable {
+    
+    typealias AnimationClosure = (KeyboardAnimationInfo) -> Void
+    
+    typealias Completion = ((UIViewAnimatingPosition) -> Void)
+    
+    @objc func keyboardHandler(_ notification: Notification)
+}
 
-public extension KeyboardAnimatable {
+public struct KeyboardAnimation {
+    let animation: KeyboardAnimatable.AnimationClosure
+    let completion: KeyboardAnimatable.Completion?
+}
+
+public final class KeyboardAnimationStore: NSObject {
     
-    /// Adds an entry to the notification center to call the provided selector with the notification.
-    ///
-    /// Unregister an observer to stop receiving notifications.
-    ///
-    /// To unregister an observer, use removeObserver(_:) or removeObserver(_:name:object:) with the most specific detail possible. For example, if you used a name and object to register the observer, use the name and object to remove it.
-    ///
-    /// If your app targets iOS 9.0 and later or macOS 10.11 and later, you do not need to unregister an observer that you created with this function. If you forget or are unable to remove an observer, the system cleans up the next time it would have posted to it.
-    ///
-    /// - Parameters:
-    ///   - aSelector: A selector that specifies the message the receiver sends observer to alert it to the notification posting. The method that aSelector specifies must have one and only one argument (an instance of NSNotification).
-    ///   - keyboardNotification: The keyboard notification to register for delivery to the observer.
-    func addKeyboardNotificationObserver(with selector: Selector, when keyboardNotification: KeyboardNotificationName) {
-        NotificationCenter.default.addKeyboardNotificationObserver(self, selector: selector, when: keyboardNotification)
+    private var store: [KeyboardNotificationName: KeyboardAnimation] = [:]
+    
+    subscript(notification: KeyboardNotificationName) -> KeyboardAnimation? {
+        get { store[notification] }
+        set { store[notification] = newValue }
     }
     
-    /// Removes matching entries from the notification center's dispatch table.
-    ///
-    /// Removing the observer stops it from receiving notifications.
-    ///
-    /// If you used addObserver(forName:object:queue:using:) to create your observer, you should call this method or removeObserver(_:) before the system deallocates any object that addObserver(forName:object:queue:using:) specifies.
-    ///
-    /// If your app targets iOS 9.0 and later or macOS 10.11 and later, and you used addObserver(_:selector:name:object:) to create your observer, you do not need to unregister the observer. If you forget or are unable to remove the observer, the system cleans up the next time it would have posted to it.
-    ///
-    /// When unregistering an observer, use the most specific detail possible. For example, if you used a name and object to register the observer, use removeObserver(_:name:object:) with the name and object.
-    ///
-    /// - Parameters:
-    ///   - observer: The observer to remove from the dispatch table. Specify an observer to remove only entries for this observer.
-    ///   - keyboardNotification: The keyboard notification  to remove from the dispatch table.
-    func removeKeyboardNotificationObserver(with selector: Selector, when keyboardNotification: KeyboardNotificationName) {
-        NotificationCenter.default.removeKeyboardNotificationObserver(self, when: keyboardNotification)
+}
+
+public protocol KeyboardAnimationStorable: NSObject {
+    var keyboardAnimationStore: KeyboardAnimationStore? { get set}
+}
+
+extension UIViewController: KeyboardAnimationStorable {
+    private static var keyboardAnimationStore = ObjectAssociation<KeyboardAnimationStore>()
+    
+    public var keyboardAnimationStore: KeyboardAnimationStore? {
+        get { Self.keyboardAnimationStore[self] }
+        set { Self.keyboardAnimationStore[self] = newValue }
     }
     
-    /// Animate changes to one or more views using the keyboard animation's duration and animation curve.
-    ///
-    /// - Parameters:
-    ///   - notification: A notification containing keyboard animation information, others will be ignored.
-    ///   - animations: The specified animation block to the animator.
-    ///   - completion: An optional block to execute when the animations finish. This block takes the parameter `finalPosition`, which describes the position where the animations stopped. Use this value to specify whether the animations stopped at their starting point, their end point, or their current position.
-    func animate(withKeyboardNotification notification: Notification,
-                 animations: @escaping (KeyboardAnimationInfo) -> Void,
-                 completion: ((UIViewAnimatingPosition) -> Void)? = nil) {
-        UIView.animate(withKeyboardNotification: notification, animations: animations, completion: completion)
+    @objc func keyboardHandler(_ notification: Notification) {
+        guard
+            let keyboardNotificationName = KeyboardNotificationName(rawValue: notification.name),
+            let keyboardAnimation = keyboardAnimationStore?[keyboardNotificationName]
+        else {
+            return
+        }
+        
+        UIView.animate(
+            withKeyboardNotification: notification,
+            animations: keyboardAnimation.animation,
+            completion: keyboardAnimation.completion
+        )
     }
+}
+
+
+extension UIView: KeyboardAnimationStorable {
+    private static var keyboardAnimationStore = ObjectAssociation<KeyboardAnimationStore>()
+    
+    public var keyboardAnimationStore: KeyboardAnimationStore? {
+        get { Self.keyboardAnimationStore[self] }
+        set { Self.keyboardAnimationStore[self] = newValue }
+    }
+    
+    @objc func keyboardHandler(_ notification: Notification) {
+        guard
+            let keyboardNotificationName = KeyboardNotificationName(rawValue: notification.name),
+            let keyboardAnimation = keyboardAnimationStore?[keyboardNotificationName]
+        else {
+            return
+        }
+        
+        UIView.animate(
+            withKeyboardNotification: notification,
+            animations: keyboardAnimation.animation,
+            completion: keyboardAnimation.completion
+        )
+    }
+}
+
+public extension KeyboardAnimatable where Self: KeyboardAnimationStorable {
+    
+    func animateWithKeyboard(when notificationNames: [KeyboardNotificationName],
+                                    animations: @escaping AnimationClosure,
+                                    completion: Completion? = nil) {
+        
+        let store = keyboardAnimationStore ?? KeyboardAnimationStore()
+        
+        notificationNames.forEach { notificationName in
+            
+            let animation = KeyboardAnimation(
+                animation: animations,
+                completion: completion
+            )
+            
+            store[notificationName] = animation
+            
+            NotificationCenter.default.addKeyboardNotificationObserver(
+                self,
+                selector: #selector(keyboardHandler(_:)),
+                when: notificationName
+            )
+        }
+        
+        keyboardAnimationStore = store
+    }
+    
+    func removeKeyboardAnimations(when notificationNames: [KeyboardNotificationName]) {
+        notificationNames.forEach { notificationName in
+            NotificationCenter.default.removeKeyboardNotificationObserver(self, when: notificationName)
+        }
+    }
+    
 }

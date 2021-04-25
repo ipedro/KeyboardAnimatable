@@ -44,8 +44,37 @@ public enum KeyboardNotificationName {
     
     /// Posted immediately after a change in the keyboard’s frame.
     case didChangeFrame
+}
+
+extension KeyboardNotificationName: RawRepresentable {
+    public typealias RawValue = Notification.Name
     
-    var notificationName: Notification.Name {
+    public init?(rawValue: Notification.Name) {
+        switch rawValue {
+        case .keyboardWillShow:
+            self = .willShow
+        
+        case .keyboardDidShow:
+            self = .didShow
+        
+        case .keyboardWillHide:
+            self = .willHide
+        
+        case .keyboardDidHide:
+            self = .didHide
+            
+        case .keyboardWillChangeFrame:
+            self = .willChangeFrame
+        
+        case .keyboardDidChangeFrame:
+            self = .didChangeFrame
+            
+        default:
+            return nil
+        }
+    }
+    
+    public var rawValue: Notification.Name {
         switch self {
         
         case .willShow:

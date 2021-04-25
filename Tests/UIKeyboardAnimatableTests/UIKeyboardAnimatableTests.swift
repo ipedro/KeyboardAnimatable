@@ -1,5 +1,5 @@
 import XCTest
-@testable import KeyboardAnimatable
+@testable import UIKeyboardAnimatable
 
 final class UIKeyboardAnimatableTests: XCTestCase {
     func testExample() {

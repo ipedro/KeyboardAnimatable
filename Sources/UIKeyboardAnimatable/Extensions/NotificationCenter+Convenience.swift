@@ -39,7 +39,7 @@ public extension NotificationCenter {
     ///   - aSelector: A selector that specifies the message the receiver sends observer to alert it to the notification posting. The method that aSelector specifies must have one and only one argument (an instance of NSNotification).
     ///   - keyboardNotification: The keyboard notification to register for delivery to the observer.
     func addKeyboardNotificationObserver(_ observer: Any, selector aSelector: Selector, when keyboardNotification: KeyboardNotificationName) {
-        addObserver(observer, selector: aSelector, name: keyboardNotification.notificationName, object: nil)
+        addObserver(observer, selector: aSelector, name: keyboardNotification.rawValue, object: nil)
     }
     
     /// Removes matching entries from the notification center's dispatch table.
@@ -56,7 +56,7 @@ public extension NotificationCenter {
     ///   - observer: The observer to remove from the dispatch table. Specify an observer to remove only entries for this observer.
     ///   - keyboardNotification: The keyboard notification  to remove from the dispatch table.
     func removeKeyboardNotificationObserver(_ observer: Any, when keyboardNotification: KeyboardNotificationName) {
-        removeObserver(observer, name: keyboardNotification.notificationName, object: nil)
+        removeObserver(observer, name: keyboardNotification.rawValue, object: nil)
     }
     
 }
