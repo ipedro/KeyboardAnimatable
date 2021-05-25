@@ -23,15 +23,14 @@
 //
 
 import UIKit
-import ObjectAssociation
 
 extension NSObject: KeyboardAnimationStorable {
     
-    private static var keyboardAnimationStore = ObjectAssociation<KeyboardAnimationStore>()
+    private static var keyboardAnimationStore = [ObjectIdentifier: KeyboardAnimationStore]()
     
     public var keyboardAnimationStore: KeyboardAnimationStore? {
-        get { Self.keyboardAnimationStore[self] }
-        set { Self.keyboardAnimationStore[self] = newValue }
+        get { Self.keyboardAnimationStore[ObjectIdentifier(self)] }
+        set { Self.keyboardAnimationStore[ObjectIdentifier(self)] = newValue }
     }
     
     @objc public func keyboardAnimationHandler(_ notification: Notification) {
