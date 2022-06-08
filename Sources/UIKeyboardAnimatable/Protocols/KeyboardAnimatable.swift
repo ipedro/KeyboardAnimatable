@@ -31,13 +31,11 @@ public typealias KeyboardAnimationInfo = (duration: TimeInterval, keyboardFrame:
     typealias Animations = ((KeyboardAnimationInfo) -> Void)
     
     typealias Completion = ((UIViewAnimatingPosition) -> Void)
-    
-    @objc func keyboardAnimationHandler(_ notification: Notification)
 }
 
 // MARK: - KeyboardAnimationStorable Extension
 
-public extension KeyboardAnimatable where Self: KeyboardAnimationStorable {
+public extension KeyboardAnimatable {
     
     private var notificationCenter: NotificationCenter { NotificationCenter.default }
     
@@ -45,18 +43,22 @@ public extension KeyboardAnimatable where Self: KeyboardAnimationStorable {
                              animations: @escaping Animations,
                              completion: Completion? = nil) {
         
-        let store = keyboardAnimationStore ?? KeyboardAnimationStore()
-        
-        let animation = KeyboardAnimation(
-            animation: animations,
-            completion: completion
-        )
-        
-        store[notificationName] = animation
-        
-        notificationCenter.addObserver(self, selector: #selector(keyboardAnimationHandler(_:)), name: notificationName.rawValue, object: nil)
-        
-        keyboardAnimationStore = store
+        notificationCenter.addObserver(
+            forName: notificationName.rawValue,
+            object: .none,
+            queue: .main
+        ) { notification in
+            let keyboardAnimation = KeyboardAnimation(
+                animation: animations,
+                completion: completion
+            )
+            
+            UIView.animate(
+                withKeyboardNotification: notification,
+                animations: keyboardAnimation.animation,
+                completion: keyboardAnimation.completion
+            )
+        }
     }
     
     func stopAnimatingWhenKeyboard(_ notificationNames: KeyboardNotificationName...) {
